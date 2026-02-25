@@ -11,7 +11,7 @@ namespace GamePlayArchitecture
 
         protected virtual void Start()
         {
-            // 注册自己到世界
+            // 游戏逻辑开始时，注册自己到世界
             World.RegisterAActor(this);
         }
 

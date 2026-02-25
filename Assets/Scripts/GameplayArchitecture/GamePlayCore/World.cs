@@ -3,9 +3,11 @@ using UnityEngine;
 
 namespace GamePlayArchitecture
 {
+    //CRTP（Curiously Recurring Template Pattern，奇异递归模板模式
     public class World : MonoSingleton<World>
     {
         // 所有的AActor名单
+        // 双缓冲思想 新产生的AActor放入_pendingAActors中
         private List<AActor> _actors = new List<AActor>();
         private List<AActor> _pendingAActors = new List<AActor>();
 
@@ -33,8 +35,8 @@ namespace GamePlayArchitecture
                 {
                     if (!_actors.Contains(newAActor))
                     {
-                        _actors.Add(newAActor);
-                        newAActor.BeginPlay();
+                        _actors.Add(newAActor); //现有名单不包含新产生的actor,更新到名单去
+                        newAActor.BeginPlay();  //加入到名单时，开始执行游戏逻辑。
                     }
                 }
             }
@@ -42,7 +44,7 @@ namespace GamePlayArchitecture
             // 2. 驱动所有 AActor 的 Tick
             float dt = Time.deltaTime;
 
-            // 倒序遍历，安全删除
+            // 倒序遍历，安全删除 //保证补位索引的元素是已经被遍历过的元素，不会漏读
             for (int i = _actors.Count - 1; i >= 0; i--)
             {
                 if (_actors[i] == null)
@@ -59,7 +61,7 @@ namespace GamePlayArchitecture
             }
         }
 
-        // --- 静态 API ---
+        // --- 静态 API --- 外观模式（Facade）思想
 
         public static void RegisterAActor(AActor actor)
         {
@@ -73,6 +75,7 @@ namespace GamePlayArchitecture
             }
         }
 
+        //注销actor
         public static void UnregisterAActor(AActor actor)
         {
             if (Instance == null) return;
@@ -87,6 +90,7 @@ namespace GamePlayArchitecture
             }
         }
 
+        //析构
         protected override void OnDestroy()
         {
             _actors.Clear();
