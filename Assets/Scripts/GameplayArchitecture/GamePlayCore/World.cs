@@ -6,10 +6,35 @@ namespace GamePlayArchitecture
     //CRTP（Curiously Recurring Template Pattern，奇异递归模板模式
     public class World : MonoSingleton<World>
     {
+        // ================= 添加部分 =================
+        /// <summary>
+        /// 当前世界的最高权限规则裁判
+        /// </summary>
+        public AGameModeBase AuthorityGameMode { get; private set; }
+        // ============================================
+
         // 所有的AActor名单
         // 双缓冲思想 新产生的AActor放入_pendingAActors中
         private List<AActor> _actors = new List<AActor>();
         private List<AActor> _pendingAActors = new List<AActor>();
+
+        private void Awake()
+        {
+            // ================= 添加部分 =================
+            // 在世界诞生时，寻找场景中配置的 GameMode
+            AuthorityGameMode = GameObject.FindObjectOfType<AGameModeBase>();
+            if (AuthorityGameMode != null)
+            {
+                // 【修正】使用 Log.N 替代 Log.I
+                Log.N($"[World] 已挂载当前关卡的游戏模式: {AuthorityGameMode.GetType().Name}");
+            }
+            else
+            {
+                // 【修正】使用 Log.E 替代 Log.W，因为缺少 GameMode 是个严重的架构缺失
+                Log.E("[World] 警告：当前场景未找到任何继承自 AGameModeBase 的游戏模式！");
+            }
+            // ============================================
+        }
 
         private void Start()
         {
