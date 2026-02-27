@@ -31,8 +31,8 @@ namespace GamePlayArchitecture
         private RingBuffer<Action>[] _frontBuffers;
         //多级事件缓冲区
         private RingBuffer<Action>[] _backBuffers;
-        //需要一个字典，来存储事件对象和回调的对应关系
-        private Dictionary<Type, Delegate> _listenersDic;
+        //需要一个字典，来存储事件对象和回调的对应关系  
+        private Dictionary<Type, Delegate> _listenersDic;//Delegate : Action（不带返回）和 Func的 基类。类似一个C++通用函数指针。
 
         private void Awake()
         {
