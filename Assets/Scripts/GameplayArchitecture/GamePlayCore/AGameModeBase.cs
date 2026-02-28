@@ -20,6 +20,7 @@ namespace GamePlayArchitecture
             base.BeginPlay();
             InitGameState();
             StartPlay();
+            World.RegisterGameMode(this);
         }
 
         protected virtual void InitGameState()

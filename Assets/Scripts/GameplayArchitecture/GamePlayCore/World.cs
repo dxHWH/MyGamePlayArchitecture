@@ -22,15 +22,15 @@ namespace GamePlayArchitecture
         {
             // ================= 添加部分 =================
             // 在世界诞生时，寻找场景中配置的 GameMode
-            AuthorityGameMode = GameObject.FindObjectOfType<AGameModeBase>();
-            if (AuthorityGameMode != null)
-            {
-                Log.N($"[World] 已挂载当前关卡的游戏模式: {AuthorityGameMode.GetType().Name}");
-            }
-            else
-            {
-                Log.E("[World] 警告：当前场景未找到任何继承自 AGameModeBase 的游戏模式！");
-            }
+            //AuthorityGameMode = GameObject.FindObjectOfType<AGameModeBase>();
+            //if (AuthorityGameMode != null)
+            //{
+            //    Log.N($"[World] 已挂载当前关卡的游戏模式: {AuthorityGameMode.GetType().Name}");
+            //}
+            //else
+            //{
+            //    Log.E("[World] 警告：当前场景未找到任何继承自 AGameModeBase 的游戏模式！");
+            //}
             // ============================================
         }
 
@@ -96,6 +96,19 @@ namespace GamePlayArchitecture
             {
                 Instance._pendingAActors.Add(actor);
             }
+        }
+
+        // GameMode注册，以后可以改成World直接Spawn一个对应的GameMode实例
+        public static void RegisterGameMode(AGameModeBase gameMode)
+        {
+            if (Instance == null) return;
+            if (Instance.AuthorityGameMode != null)
+            {
+                Log.E("[World] 警告：场景中存在多个裁判！将忽略后注册的裁判！");
+                return;
+            }
+            Instance.AuthorityGameMode = gameMode;
+            Log.N($"[World] 裁判已主动报到，当前游戏模式: {gameMode.GetType().Name}");
         }
 
         //注销actor
