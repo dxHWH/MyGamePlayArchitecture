@@ -25,12 +25,10 @@ namespace GamePlayArchitecture
             AuthorityGameMode = GameObject.FindObjectOfType<AGameModeBase>();
             if (AuthorityGameMode != null)
             {
-                // 【修正】使用 Log.N 替代 Log.I
                 Log.N($"[World] 已挂载当前关卡的游戏模式: {AuthorityGameMode.GetType().Name}");
             }
             else
             {
-                // 【修正】使用 Log.E 替代 Log.W，因为缺少 GameMode 是个严重的架构缺失
                 Log.E("[World] 警告：当前场景未找到任何继承自 AGameModeBase 的游戏模式！");
             }
             // ============================================

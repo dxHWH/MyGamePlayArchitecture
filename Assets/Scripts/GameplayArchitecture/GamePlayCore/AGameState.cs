@@ -27,10 +27,9 @@ namespace GamePlayArchitecture
             EMatchState oldState = MatchState;
             MatchState = newState;
 
-            // [日志系统融合]
             Log.D($"[GameState] 比赛阶段切换: {oldState} -> {newState}");
 
-            // [事件系统融合] 组装信件并寄出！UI 监听此事件即可，彻底告别 Update
+            // [事件系统] 组装信件并寄出！UI 监听此事件即可，彻底告别 Update
             MatchStateChangedEventArgs evt = new MatchStateChangedEventArgs()
             {
                 OldState = oldState,
