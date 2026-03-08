@@ -9,16 +9,32 @@ public class DemoGameMode : AGameMode
     private AController _pendingController;
     private APawn _pendingPawn;
 
+    // 【新增】：裁判手中的“最高权力秒表”
+    private TimerHandle _warmupTimerHandle;
+
     public override void BeginPlay()
     {
         Log.N($"<color=cyan>[DemoGameMode] {WelcomeMessage}</color>");
         base.BeginPlay();
 
-        // 【事件订阅】：裁判上班第一件事，就是监听玩家有没有点击入场按钮
+        // 裁判上班第一件事，监听玩家获取控制权的请求
         EventSystem.Instance.Register<PlayerRequestControlEventArgs>(OnPlayerRequestedControl);
+
+        // 【核心重构：掌控时间】：
+        // 游戏刚开始，裁判按下秒表，进入 Warmup (热身) 阶段
+        Log.N($"<color=yellow>[DemoGameMode] 比赛进入热身阶段，{WarmupTime}秒后正式开始！</color>");
+
+        _warmupTimerHandle = TimerSystem.Instance.CreateTimer(
+            duration: WarmupTime, // 这里的 WarmupTime 是从你父类 AGameMode 继承来的属性
+            onComplete: () =>
+            {
+                // 【倒计时结束】：裁判吹哨，比赛正式开始！
+                StartMatch();
+            },
+            timerName: "MatchWarmupTimer" // 【关键】：我们给这个计时器起个名字，方便全宇宙（包括 UI）来查时间
+        );
     }
 
-    // 生命周期管理：对象销毁时必须注销事件，防止内存泄漏！
     protected override void OnDestroy()
     {
         base.OnDestroy();
@@ -26,11 +42,15 @@ public class DemoGameMode : AGameMode
         {
             EventSystem.Instance.UnRegister<PlayerRequestControlEventArgs>(OnPlayerRequestedControl);
         }
+
+        // 【安全防线】：如果 GameMode 被意外销毁（比如强退关卡），立刻掐死秒表
+        TimerSystem.Instance.StopTimer(_warmupTimerHandle);
     }
 
     protected override void StartMatch()
     {
-        base.StartMatch();
+        base.StartMatch(); // 父类在这里面大概率会改变状态（变成 InProgress）并广播事件给全服
+
         Log.N("<color=cyan>[DemoGameMode] 倒计时结束，生成灰色角色...</color>");
         SpawnPlayer();
     }
@@ -46,7 +66,6 @@ public class DemoGameMode : AGameMode
         _pendingController.name = "DemoController_Runtime";
     }
 
-    // 【事件回调】：当裁判听到 UI 大喊“玩家点按钮了”，执行灵魂注入！
     private void OnPlayerRequestedControl(PlayerRequestControlEventArgs e)
     {
         if (_pendingController != null && _pendingPawn != null)

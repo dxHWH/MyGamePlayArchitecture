@@ -52,8 +52,7 @@ namespace GamePlayArchitecture
             // 切入进行中阶段（UI 监听到事件，隐藏倒计时，显示血条；此处可执行玩家生成/附身逻辑）
             GameState?.SetMatchState(AGameState.EMatchState.InProgress);
 
-            // 【极其重要】很多时候会忘了写这一行！
-            // 比赛正式开始，裁判把玩家放进场！
+            // 比赛正式开始，裁判在这里把玩家放进场景
         }
 
         public virtual void EndMatch()

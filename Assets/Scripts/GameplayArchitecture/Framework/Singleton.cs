@@ -51,7 +51,7 @@ namespace GamePlayArchitecture
                     // 查找场景中是否已存在实例
                     _instance = FindObjectOfType<T>();
 
-                    if (_instance == null)
+                    if (_instance == null)//当有对象调用对应的单例对象（例如World.Instance）时，直接创建一个。
                     {
                         GameObject newGO = new GameObject(typeof(T).Name);
                         _instance = newGO.AddComponent<T>();

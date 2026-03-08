@@ -35,8 +35,8 @@ namespace GamePlayArchitecture
         public ObjectPool(int initialCapacity)
         {
             _capacity = initialCapacity;
-            _pool = new Elem[_capacity];
-            _availableIndexStack = new Stack<int>(_capacity);
+            _pool = new Elem[_capacity];//申请一段固定大小的连续内存
+            _availableIndexStack = new Stack<int>(_capacity);//申请一个下标栈
             for (int i = 0; i < _capacity; ++i)
             {
                 _pool[i].elem = new T();
@@ -50,7 +50,7 @@ namespace GamePlayArchitecture
             if (_availableIndexStack.TryPop(out int index))
             {
                 obj = new PoolObject<T>(_pool[index].elem, index);
-                _pool[index].IsAvailable = false;
+                _pool[index].IsAvailable = false; 
                 obj.elem.OnSpawn();
                 return true;
             }
