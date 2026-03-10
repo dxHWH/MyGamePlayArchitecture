@@ -44,9 +44,13 @@ namespace GamePlayArchitecture
         /// </summary>
         public void UnPossess()
         {
-            if (ControlledPawn == null) return;
+            if (ControlledPawn == null)
+            {
+                Log.D($"{name} 不存在控制的对象，请检查");
+                return;
+            }
 
-            Log.D($"{name} 放弃了 {ControlledPawn.name} 的控制权");
+                Log.D($"{name} 放弃了 {ControlledPawn.name} 的控制权");
 
             // 1. 通知 APawn 它自由了
             ControlledPawn.UnPossessed();

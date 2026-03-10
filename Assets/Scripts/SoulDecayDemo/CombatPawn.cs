@@ -10,10 +10,16 @@ public class CombatPawn : APawn
     private Renderer _renderer;
     private TimerHandle _decayTimer; // 寿命倒计时把柄
 
+    // 1. 将获取引用的逻辑提前到 Awake
+    private void Awake()
+    {
+        _renderer = GetComponent<Renderer>();
+        // 如果有 Rigidbody 或 Collider 的获取，也全放这里
+    }
+
     public override void BeginPlay()
     {
         base.BeginPlay();
-        _renderer = GetComponent<Renderer>();
     }
 
     public void Move(Vector3 direction, float deltaTime)
@@ -46,22 +52,42 @@ public class CombatPawn : APawn
         }
     }
 
-    protected override void OnUnPossess()
+ // Assets/Scripts/SoulDecayDemo/CombatPawn.cs
+
+protected override void OnUnPossess()
+{
+    // 获取当前正在离开的控制器引用
+    var leavingController = this.Controller;
+
+    base.OnUnPossess();
+
+    // 无论谁离开，都先停止倒计时器（防止 AI 身上如果有计时器产生干扰）
+    if (TimerSystem.HasInstance && _decayTimer != TimerHandle.Invalid)
     {
-        base.OnUnPossess();
-
-        if (TimerSystem.HasInstance && _decayTimer != TimerHandle.Invalid)
-        {
-            TimerSystem.Instance.StopTimer(_decayTimer);
-        }
-
+        TimerSystem.Instance.StopTimer(_decayTimer);
+        _decayTimer = TimerHandle.Invalid;
+    }
+    // 只有当离开的灵魂是“玩家”时，才触发枯萎和销毁逻辑
+    if (leavingController is SoulPlayerController)
+    {
         _renderer.material.color = Color.black;
-        gameObject.name = "Dead Body";
+        gameObject.name = "Dead Body (Player's Old Shell)";
 
+        // 建议：如果你想让尸体还能被撞到，可以用 enabled = false
+        // 如果想彻底穿透，就 Destroy 碰撞体
         Collider col = GetComponent<Collider>();
-        if (col != null) Destroy(col);
+        if (col != null) col.enabled = false; 
+
+        // 物理销毁（回收内存）
         Destroy(gameObject, 3.0f);
     }
+    else
+    {
+        // 如果离开的是 AI（例如正在被玩家夺舍），我们保持身体状态“新鲜”
+        // 这样玩家进去后，看到的就是彩色的、有碰撞的正常身体
+        Log.N($"AI 灵魂已迁出 {gameObject.name}，等待新主入驻...");
+    }
+}
 
     private void OnBodyExploded()
     {

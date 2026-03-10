@@ -21,8 +21,8 @@ namespace GamePlayArchitecture
         /// </summary>
         public void UnPossessed()
         {
+            OnUnPossess(); // 先通知子类，拿到当前控制器的引用做一些判断。
             Controller = null;
-            OnUnPossess(); // 通知子类
         }
 
         // --- 给子类重写的“回调” ---

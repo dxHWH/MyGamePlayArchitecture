@@ -55,7 +55,7 @@ public class SurvivalGameMode : AGameMode
         aiSoul.Possess(aiBody);
     }
 
-    // 【找回丢失的代码】：完整的数据驱动工厂方法
+    // 完整的数据驱动工厂方法
     private CombatPawn CreatePawn(Vector3 position, bool isHeavy)
     {
         GameObject bodyObj = isHeavy
@@ -73,13 +73,13 @@ public class SurvivalGameMode : AGameMode
         {
             pawn.transform.localScale = Vector3.one * 1.5f;
             pawn.MoveSpeed = 3f;
-            pawn.MaxLifespan = 8f;
+            pawn.MaxLifespan = 30f;
         }
         else
         {
             pawn.transform.localScale = Vector3.one * 0.8f;
             pawn.MoveSpeed = 8f;
-            pawn.MaxLifespan = 3.5f;
+            pawn.MaxLifespan = 30f;
         }
 
         return pawn;

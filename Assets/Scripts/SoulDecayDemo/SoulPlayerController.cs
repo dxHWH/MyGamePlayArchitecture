@@ -49,10 +49,10 @@ public class SoulPlayerController : AUnityController, IFactionMember
                     // 只有阵营不同，才能夺舍！
                     if (targetSoul.FactionId != this.FactionId)
                     {
-                        // 1. 霸道剥夺：踢出目标体内原有的敌对灵魂
-                        targetPawn.Controller.UnPossess();
+                        // 1. 霸道剥夺：踢出目标体内原有的敌对灵魂【注意】这一步UE框架下会默认执行
+                        //targetPawn.Controller.UnPossess();
 
-                        // 2. 灵魂转移：注入新身体！
+                        // 2. 灵魂转移：注入新身体！            
                         this.Possess(targetPawn);
 
                         // 3. 【完美契合新框架】：通过 World 枢纽，安全、规范地获取当前局的专属计分板
