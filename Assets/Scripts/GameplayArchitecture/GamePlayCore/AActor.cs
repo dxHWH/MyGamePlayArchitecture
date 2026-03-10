@@ -18,7 +18,8 @@ namespace GamePlayArchitecture
         protected virtual void OnDestroy()
         {
             // 临死前从世界注销
-            World.UnregisterAActor(this);
+            if (World.HasInstance)
+                World.UnregisterAActor(this);
         }
 
         // --- 我们定义的 UE 风格生命周期 ---

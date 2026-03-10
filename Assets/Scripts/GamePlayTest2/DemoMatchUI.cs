@@ -24,7 +24,7 @@ public class DemoMatchUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (EventSystem.Instance != null)
+        if (EventSystem.HasInstance)
             EventSystem.Instance.UnRegister<MatchStateChangedEventArgs>(OnMatchStateChanged);
     }
 

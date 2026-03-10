@@ -31,6 +31,7 @@ namespace GamePlayArchitecture
 
         public override void Tick(float deltaTime)
         {
+            if (Time.timeScale == 0f) return;
             // 如果没有控制任何 APawn，就没有必要处理移动逻辑
             if (ControlledPawn == null) return;
 
@@ -44,7 +45,7 @@ namespace GamePlayArchitecture
             }
         }
 
-        private void HandleMovement(Vector2 input, float deltaTime)
+        protected virtual void HandleMovement(Vector2 input, float deltaTime)
         {
             // 将 2D 输入转换为 3D 移动方向 (假设 Y 是向上)
             Vector3 moveDir = new Vector3(input.x, 0, input.y);

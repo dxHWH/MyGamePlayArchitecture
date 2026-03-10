@@ -1,64 +1,70 @@
 using UnityEngine;
+using System;
 
 namespace GamePlayArchitecture
 {
     /// <summary>
-    /// 包含复杂比赛状态机的模式类，利用 TimerSystem 实现零GC流程控制
+    /// 包含复杂比赛状态机的模式类。
+    /// 仅定义状态与流程框架，具体流转条件（如倒计时）由子类实现。
     /// </summary>
     public class AGameMode : AGameModeBase
     {
-        // 使用 new 关键字隐藏基类属性，方便获取高级版 GameState
         public new AGameState GameState => base.GameState as AGameState;
 
-        [Header("比赛规则")]
-        public float WarmupTime = 3.0f; // 准备阶段倒计时
+        public virtual Type GameStateClass => typeof(AGameState);
 
-        protected override void InitGameState()
+        override protected void InitGameState()
         {
-            base.GameState = FindObjectOfType<AGameState>();
-            if (base.GameState == null)
+            // 1. 获取应该生成的具体类型
+            Type stateType = GameStateClass;
+
+            // 2. 动态生成物体
+            GameObject gsObj = new GameObject($"GameState_{this.GetType().Name}");
+
+            // 3. 【神来之笔】：使用反射版的 AddComponent，动态挂载对应的子类计分板！
+            base.GameState = gsObj.AddComponent(stateType) as AGameState;
+
+            // 4. 权威担保：裁判亲自去世界中心注册！
+            if (World.HasInstance)
             {
-                GameObject gsObj = new GameObject("GameState");
-                base.GameState = gsObj.AddComponent<AGameState>();
+                World.Instance.RegisterGameState(this, GameState);
             }
+
+            // 5. 动态日志，谁调用的打印谁的名字
+            Log.N($"[{this.GetType().Name}] 专属计分板 ({stateType.Name}) 已就位，并由 GameMode 担保注册完毕！");
         }
 
         public override void StartPlay()
         {
             base.StartPlay();
 
-            // 1. 切入等待阶段（此时 UI 监听到事件，可弹出 "3, 2, 1"）
-            GameState?.SetMatchState(AGameState.EMatchState.WaitingToStart);
-            Log.N($"[GameMode] 进入等待阶段，{WarmupTime} 秒后正式开始...");
-
-            // 2. 【修复点】调用你框架中真正的 TimerSystem API：CreateTimer
-            if (WarmupTime > 0)
+            // 基类只负责切入基础状态，不负责具体的计时逻辑
+            if (GameState != null)
             {
-                // 参数1: 时长 (WarmupTime)
-                // 参数2: 完成时的回调 (StartMatch)
-                // (其它的如 interval, isLoop 等参数原作者已设置了恰当的默认值)
-                TimerSystem.Instance.CreateTimer(WarmupTime, StartMatch);
+                GameState.SetMatchState(AGameState.EMatchState.WaitingToStart);
             }
-            else
-            {
-                StartMatch();
-            }
+            Log.N("[GameMode] 进入等待阶段...");
         }
 
+        // 提供给子类调用的正式开始接口
         protected virtual void StartMatch()
         {
-            Log.N("[GameMode] 倒计时结束，正式比赛开始！");
+            Log.N("[GameMode] 比赛正式开始！");
 
-            // 切入进行中阶段（UI 监听到事件，隐藏倒计时，显示血条；此处可执行玩家生成/附身逻辑）
-            GameState?.SetMatchState(AGameState.EMatchState.InProgress);
-
-            // 比赛正式开始，裁判在这里把玩家放进场景
+            if (GameState != null)
+            {
+                GameState.SetMatchState(AGameState.EMatchState.InProgress);
+            }
         }
 
         public virtual void EndMatch()
         {
             Log.N("[GameMode] 比赛结束，准备结算！");
-            GameState?.SetMatchState(AGameState.EMatchState.WaitingPostMatch);
+
+            if (GameState != null)
+            {
+                GameState.SetMatchState(AGameState.EMatchState.WaitingPostMatch);
+            }
         }
     }
 }

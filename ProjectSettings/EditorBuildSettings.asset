@@ -4,5 +4,14 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/MainMenuScene.unity
+    guid: f03fd428ac78ab243a5896eab22d6daf
+  - enabled: 1
+    path: Assets/Scenes/GamePlayTest2Scene.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/SoulDecayScene.unity
+    guid: f2590585a16159e4983520fedb52c621
   m_configObjects: {}

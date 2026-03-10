@@ -12,6 +12,8 @@ namespace GamePlayArchitecture
         // 游戏自启动以来的运行时间（供全局访问）
         public float ServerWorldTimeSeconds { get; protected set; }
 
+
+
         public override void Tick(float deltaTime)
         {
             base.Tick(deltaTime);

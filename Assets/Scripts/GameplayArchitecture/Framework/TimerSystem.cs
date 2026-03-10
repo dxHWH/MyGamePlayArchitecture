@@ -440,6 +440,8 @@ namespace GamePlayArchitecture
                 {
                     int handleIndex = _indexToHandle[i];
                     _expiredTimersCache.Add(new TimerHandle(handleIndex, _generations[handleIndex]));
+                    //即使开启了循环，也只把当前这个 Handle 加入过期列表，下一帧它会被重新计算时间并继续触发
+                    //在过期队列中，去触发当前循环计时器的逻辑
 
                     if (timer.isLoop)
                     {

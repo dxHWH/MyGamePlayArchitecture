@@ -18,6 +18,7 @@ namespace GamePlayArchitecture
         private List<AActor> _actors = new List<AActor>();
         private List<AActor> _pendingAActors = new List<AActor>();
 
+        public AGameState GameState { get; set; }
         private void Awake()
         {
             // ================= 添加部分 =================
@@ -32,6 +33,8 @@ namespace GamePlayArchitecture
             //    Log.E("[World] 警告：当前场景未找到任何继承自 AGameModeBase 的游戏模式！");
             //}
             // ============================================
+            //由于目前的world是懒加载单例，在场景中GameMode会先于World存在，所以改成由GameMode主动注册报到，
+            //见AGameModeBase.BeginPlay()中的World.RegisterGameMode(this);
         }
 
         private void Start()
@@ -123,6 +126,37 @@ namespace GamePlayArchitecture
             if (Instance._pendingAActors.Contains(actor))
             {
                 Instance._pendingAActors.Remove(actor);
+            }
+        }
+
+        public void RegisterGameState(AGameMode authority, AGameState newGameState)
+        {
+            // 基础防御：只认当前裁判带来的人
+            if (authority == null || authority != AuthorityGameMode)
+            {
+                Log.E($"[World] 越权警告！拒绝非官方途径的计分板注册！");
+                Destroy(newGameState.gameObject);
+                return;
+            }
+
+            // 顶替旧的计分板
+            if (GameState != null && GameState != newGameState)
+            {
+                Destroy(GameState.gameObject);
+            }
+
+            GameState = newGameState;
+            Log.N($"[World] 成功注册计分板：{newGameState.GetType().Name}");
+        }
+
+
+        // 【新增】：官方指定的计分板注销接口
+        public void UnRegisterGameState(AGameState oldGameState)
+        {
+            if (GameState == oldGameState)
+            {
+                GameState = null;
+                Log.N("[World] 计分板已安全注销。");
             }
         }
 

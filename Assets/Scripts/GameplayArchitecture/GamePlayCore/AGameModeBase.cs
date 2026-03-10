@@ -25,6 +25,7 @@ namespace GamePlayArchitecture
 
         protected virtual void InitGameState()
         {
+            //旧版本，不保险的方法
             GameState = FindObjectOfType<AGameStateBase>();
             if (GameState == null)
             {

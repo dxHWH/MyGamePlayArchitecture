@@ -37,5 +37,18 @@ namespace GamePlayArchitecture
             };
             EventSystem.Instance.Trigger(evt);
         }
+
+
+        // 【核心防线】：利用基类的 OnDestroy 进行自清理
+        protected override void OnDestroy()
+        {
+            // 注意这里依然要用 HasInstance 防御“幽灵单例”报错！
+            if (World.HasInstance)
+            {
+                World.Instance.UnRegisterGameState(this);
+            }
+            // 先注销world对GameState的绑定，再注销actor
+            base.OnDestroy();
+        }
     }
 }
