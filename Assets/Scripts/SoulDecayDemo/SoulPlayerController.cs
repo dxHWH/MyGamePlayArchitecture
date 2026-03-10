@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using GamePlayArchitecture;
 
-// 继承底层基类，并挂载业务层的阵营接口
+// 继承底层基类管理输入，并挂载业务层的阵营接口
 public class SoulPlayerController : AUnityController, IFactionMember
 {
     // 实现接口：玩家生来就是 Player 阵营
@@ -13,7 +13,7 @@ public class SoulPlayerController : AUnityController, IFactionMember
         // 1. 调用基类的 Tick 处理输入读取
         base.Tick(deltaTime);
 
-        // 如果没有肉体，或者时间暂停，不能思考
+        // 如果没有肉体，或者时间暂停，不能思考和释放技能
         if (Time.timeScale == 0f || ControlledPawn == null) return;
 
         // 2. 夺舍专属逻辑：鼠标左键发射射线
@@ -23,7 +23,7 @@ public class SoulPlayerController : AUnityController, IFactionMember
         }
     }
 
-    // 拦截基类的默认平移，把移动指令下达给有数值差异的 CombatPawn
+    // 【多态的威力】：拦截基类的默认平移，把移动指令下达给有数值差异的 CombatPawn
     protected override void HandleMovement(Vector2 input, float deltaTime)
     {
         if (ControlledPawn is CombatPawn combatPawn)
@@ -40,19 +40,22 @@ public class SoulPlayerController : AUnityController, IFactionMember
         {
             CombatPawn targetPawn = hit.collider.GetComponent<CombatPawn>();
 
+            // 规则验证：点中的是合法的肉体、不是自己现在的肉体、并且对方还活着
             if (targetPawn != null && targetPawn != ControlledPawn && targetPawn.Controller != null)
             {
+                // 核心阵营判断：看看目标体内的灵魂有没有签“阵营协议”
                 if (targetPawn.Controller is IFactionMember targetSoul)
                 {
+                    // 只有阵营不同，才能夺舍！
                     if (targetSoul.FactionId != this.FactionId)
                     {
-                        // 霸道剥夺
+                        // 1. 霸道剥夺：踢出目标体内原有的敌对灵魂
                         targetPawn.Controller.UnPossess();
 
-                        // 灵魂转移
+                        // 2. 灵魂转移：注入新身体！
                         this.Possess(targetPawn);
 
-                        // 【核心修正】：通过 World 枢纽，安全、规范地获取当前局的计分板
+                        // 3. 【完美契合新框架】：通过 World 枢纽，安全、规范地获取当前局的专属计分板
                         if (World.HasInstance && World.Instance.GameState is SurvivalGameState gameState)
                         {
                             gameState.AddScore(EFaction.Player, 1);

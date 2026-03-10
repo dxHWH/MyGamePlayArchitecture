@@ -18,9 +18,11 @@ namespace GamePlayArchitecture
         public override void BeginPlay()
         {
             base.BeginPlay();
+            //一定要先注册自身，再去注册GameState
+            World.RegisterGameMode(this);
             InitGameState();
             StartPlay();
-            World.RegisterGameMode(this);
+            
         }
 
         protected virtual void InitGameState()

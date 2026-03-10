@@ -5,16 +5,13 @@ using Random = UnityEngine.Random;
 
 public class SurvivalGameMode : AGameMode
 {
-    private Action _spawnAIAction;
+    // 【新架构红利】：只需声明类型，父类会自动完成生成和 World 担保注册！
+    public override Type GameStateClass => typeof(SurvivalGameState);
 
-    // 【核心架构威力】：权威生成我们刚刚写好的专属计分板！
-    protected override void InitGameState()
-    {
-        base.InitGameState();
-    }
-
-    // 方便我们在 GameMode 内部快速获取强类型计分板
+    // 方便内部获取
     public new SurvivalGameState GameState => base.GameState as SurvivalGameState;
+
+    private Action _spawnAIAction;
 
     public override void BeginPlay()
     {
@@ -24,27 +21,26 @@ public class SurvivalGameMode : AGameMode
         _spawnAIAction = SpawnRandomAI;
         StartMatch(); // 切换到进行中状态
 
-        // 1. 生成玩家的初始肉体（给玩家一个敏捷型的球体起手）
         CombatPawn playerBody = CreatePawn(Vector3.zero, isHeavy: false);
         SoulPlayerController playerSoul = new GameObject("Player_Controller").AddComponent<SoulPlayerController>();
 
-        // 【阵营赋予】：你是玩家！
+        // 阵营赋予
         playerSoul.FactionId = EFaction.Player;
         playerSoul.Possess(playerBody);
 
-        // 2. 开启每3秒一次的零GC无尽刷怪循环
+        // 【修复致命幻觉】：严格对齐你 TimerSystem 的签名，使用具名参数避免错位！
         TimerSystem.Instance.CreateTimer(
             duration: 3.0f,
             onComplete: _spawnAIAction,
-            isLoop: true,
-            timerName: "AISpawner"
+            timerName: "AISpawner",
+            isLoop: true
         );
     }
 
     private void SpawnRandomAI()
     {
         // 比赛结束后停止刷怪
-        if (base.GameState != null && base.GameState.MatchState == AGameState.EMatchState.WaitingPostMatch)
+        if (base.GameState != null && ((SurvivalGameState)base.GameState).MatchState == AGameState.EMatchState.WaitingPostMatch)
             return;
 
         Vector3 randomPos = new Vector3(Random.Range(-10f, 10f), 0, Random.Range(-10f, 10f));
@@ -53,13 +49,13 @@ public class SurvivalGameMode : AGameMode
         CombatPawn aiBody = CreatePawn(randomPos, isHeavy);
         SimpleAIController aiSoul = new GameObject("AI_Controller").AddComponent<SimpleAIController>();
 
-        // 【阵营赋予】：50%概率是红队，50%概率是蓝队
-        //aiSoul.FactionId = Random.value > 0.5f ? EFaction.RedAI : EFaction.BlueAI;
+        // 阵营赋予：50%概率是红队，50%概率是蓝队
+        aiSoul.FactionId = Random.value > 0.5f ? EFaction.RedAI : EFaction.BlueAI;
 
         aiSoul.Possess(aiBody);
     }
 
-    // 数据驱动工厂：用代码捏造截然不同的肉体
+    // 【找回丢失的代码】：完整的数据驱动工厂方法
     private CombatPawn CreatePawn(Vector3 position, bool isHeavy)
     {
         GameObject bodyObj = isHeavy
@@ -89,6 +85,7 @@ public class SurvivalGameMode : AGameMode
         return pawn;
     }
 
+    // AGameMode 中有此方法，用于结束比赛
     public override void EndMatch()
     {
         base.EndMatch();
