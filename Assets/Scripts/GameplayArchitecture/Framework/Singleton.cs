@@ -39,6 +39,21 @@ namespace GamePlayArchitecture
         // 【新增】：提供一个安全的查询接口，用于在 OnDestroy 中判断单例是否存活
         public static bool HasInstance => (_instance != null && !_isApplicationQuitting);
 
+        // --- 处理场景预挂载单例的防重 ---
+        protected virtual void Awake()
+        {
+            // 1. 如果当前还没有实例，我就是唯一合法的实例，赶紧登记
+            if (_instance == null)
+            {
+                _instance = this as T;
+            }
+            // 2. 如果已经有实例了，而且那个实例不是我！说明我是切场景时多出来的“幽灵”，立刻自杀！
+            else if (_instance != this)
+            {
+                Destroy(gameObject);
+            }
+        }
+
         public static T Instance
         {
             get
