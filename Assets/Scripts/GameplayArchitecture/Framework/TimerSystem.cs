@@ -68,7 +68,7 @@ namespace GamePlayArchitecture
     public class TimerSystem : MonoSingleton<TimerSystem>
     {
         private const int MAX_CHASE_COUNT = 5;
-        private void Awake()
+        override protected void Awake()
         {
             AllocateCapacity(128);
         }

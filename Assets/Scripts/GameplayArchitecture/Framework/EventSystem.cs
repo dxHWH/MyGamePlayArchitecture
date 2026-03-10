@@ -34,7 +34,7 @@ namespace GamePlayArchitecture
         //需要一个字典，来存储事件对象和回调的对应关系  
         private Dictionary<Type, Delegate> _listenersDic;//Delegate : Action（不带返回）和 Func的 基类。类似一个C++通用函数指针。
 
-        private void Awake()
+        override protected void Awake()
         {
             _frontBuffers = new RingBuffer<Action>[PRIORITY_LEVEL_NUM];
             _backBuffers = new RingBuffer<Action>[PRIORITY_LEVEL_NUM];
@@ -131,7 +131,7 @@ namespace GamePlayArchitecture
         private object _listenerDicLock = new object();
         private object _swapLock = new object();
 
-        private void Awake()
+        override protected void Awake()
         {
             _threadSafeFrontBuffers = new ThreadSafeRingBuffer<Action>[PRIORITY_LEVEL_NUM];
             _ThreadSafeBackBuffers = new ThreadSafeRingBuffer<Action>[PRIORITY_LEVEL_NUM];

@@ -105,24 +105,46 @@ protected override void OnUnPossess()
         Die(true);
     }
 
-    // 【核心爽快机制】：大鱼吃小鱼的物理撞击真实加分
+    // 
+    // 大鱼吃小鱼的物理撞击真实加分（全阵营通用）
     private void OnCollisionEnter(Collision collision)
     {
-        if (Controller is IFactionMember mySoul && mySoul.FactionId == EFaction.Player)
+        // 1. 确保自己当前是被灵魂控制的“活体”，死尸不具备主动碾碎别人的能力
+        if (Controller is IFactionMember mySoul)
         {
             CombatPawn otherPawn = collision.gameObject.GetComponent<CombatPawn>();
 
+            // 2. 对方必须也是个肉体，且【我的体型必须严格大于对方】
+            // 因为碰撞是双向触发的，大小判断保证了只有大的一方会执行这段击杀逻辑
             if (otherPawn != null && this.transform.localScale.x > otherPawn.transform.localScale.x)
             {
-                Log.N("<color=yellow>碾碎了一个低级躯体！得分 +1</color>");
+                // [可选细节] 友军保护：如果对方也是活物，且跟我是同一阵营，就不互相碾压（防止红队吃红队）
+                // 如果你想看纯粹的混沌大乱斗，可以把这行 if 注释掉
+                if (otherPawn.Controller is IFactionMember otherSoul && otherSoul.FactionId == mySoul.FactionId)
+                {
+                    return;
+                }
 
-                //Destroy(otherPawn.gameObject);
-                otherPawn.Die(isExplosion: false);
+                // 3. 判定受害者身份（如果碾碎的是玩家，后果很严重）
+                bool isCrushingPlayer = otherPawn.Controller is IFactionMember victim && victim.FactionId == EFaction.Player;
 
-                // 接入计分板：向世界报告玩家得分！
+                if (isCrushingPlayer)
+                {
+                    Log.N($"<color=red>惨烈！玩家被 {mySoul.FactionId} 碾碎了！</color>");
+                    // 【注意】：因为你之前的 Die 方法里规定只有 isExplosion=true 时才会结束游戏
+                    // 为了让玩家被碾死时也能触发 Game Over，这里强行传 true
+                    otherPawn.Die(isExplosion: true);
+                }
+                else
+                {
+                    Log.N($"<color=yellow>{mySoul.FactionId} 碾碎了一个低级躯体！得分 +1</color>");
+                    otherPawn.Die(isExplosion: false);
+                }
+
+                // 4. 动态接入计分板：谁碾碎的，就给谁加分！
                 if (World.HasInstance && World.Instance.GameState is SurvivalGameState gameState)
                 {
-                    gameState.AddScore(EFaction.Player, 1);
+                    gameState.AddScore(mySoul.FactionId, 1);
                 }
             }
         }

@@ -13,7 +13,7 @@ namespace GamePlayArchitecture
         BlueAI   // 蓝色联盟
     }
 
-    // 【新增】：阵营协议接口。只要实现了这个接口的灵魂，就拥有了阵营概念
+    // 阵营协议接口。只要实现了这个接口的灵魂，就拥有了阵营概念
     public interface IFactionMember
     {
         EFaction FactionId { get; set; }

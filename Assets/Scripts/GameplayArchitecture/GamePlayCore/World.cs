@@ -19,7 +19,7 @@ namespace GamePlayArchitecture
         private List<AActor> _pendingAActors = new List<AActor>();
 
         public AGameState GameState { get; set; }
-        private void Awake()
+        override protected void Awake()
         {
             // ================= 添加部分 =================
             // 在世界诞生时，寻找场景中配置的 GameMode
@@ -80,7 +80,7 @@ namespace GamePlayArchitecture
                 }
 
                 // 只有已经 BeginPlay 的 AActor 才执行 Tick
-                if (_actors[i].HasBegunPlay)
+                if (_actors[i].HasBegunPlay && _actors[i].IsTickEnabled)
                 {
                     _actors[i].Tick(dt);
                 }

@@ -6,6 +6,8 @@ namespace GamePlayArchitecture
     {
         // 标记是否已经初始化
         public bool HasBegunPlay { get; private set; } = false;
+        //标记是否启用Tick（兼容对象池）
+        public bool IsTickEnabled { get; set; } = true;
 
         // --- Unity 底层接管区 ---
 
@@ -42,6 +44,11 @@ namespace GamePlayArchitecture
         public virtual void Tick(float deltaTime)
         {
             // 子类在这里写每帧逻辑
+        }
+
+        public void SetActorTickEnabled(bool bEnabled)
+        {
+            IsTickEnabled = bEnabled;
         }
     }
 }
