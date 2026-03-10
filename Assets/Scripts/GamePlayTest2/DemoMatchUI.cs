@@ -26,9 +26,10 @@ public class DemoMatchUI : MonoBehaviour
     {
         if (EventSystem.HasInstance)
             EventSystem.Instance.UnRegister<MatchStateChangedEventArgs>(OnMatchStateChanged);
+
     }
 
-    // 【找回灵魂】：UI 重新拿回 Update，但这次它自己不算时间了，只负责“看表”！
+    // UI 重新拿回 Update，但这次它自己不算时间了，只负责“看表”！
     private void Update()
     {
         // 只有在等待开始的阶段，UI 才需要去查秒表

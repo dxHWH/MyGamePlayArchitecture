@@ -1,11 +1,13 @@
 using UnityEngine;
 using GamePlayArchitecture;
 
+
 public class CombatPawn : APawn
 {
     [Header("肉体属性")]
     public float MoveSpeed = 5f;
     public float MaxLifespan = 5f; // 肉体保质期
+    bool isDying = false;//爆炸中，防止重复触发死亡逻辑
 
     private Renderer _renderer;
     private TimerHandle _decayTimer; // 寿命倒计时把柄
@@ -38,9 +40,15 @@ public class CombatPawn : APawn
             {
                 case EFaction.Player:
                     _renderer.material.color = Color.cyan;
-                    // 【严格遵守参数列表】：这里正好利用前两个参数 duration 和 onComplete
+                    //这里正好利用前两个参数 duration 和 onComplete
                     _decayTimer = TimerSystem.Instance.CreateTimer(MaxLifespan, OnBodyExploded);
                     Log.N($"<color=cyan>成功夺舍！肉体剩余寿命：{MaxLifespan}秒，快寻找下一个目标！</color>");
+                    // 把这具身体的倒计时票据，通过事件发给 UI
+                    if (EventSystem.HasInstance)
+                    {
+                        EventSystem.Instance.Trigger(new PlayerLifespanTimerEventArgs(_decayTimer));
+                    }
+                    // -----------------------------------------------------------
                     break;
                 case EFaction.RedAI:
                     _renderer.material.color = Color.red;
@@ -78,8 +86,10 @@ protected override void OnUnPossess()
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false; 
 
+        
         // 物理销毁（回收内存）
-        Destroy(gameObject, 3.0f);
+        if(!isDying)
+            Destroy(gameObject, 3.0f);
     }
     else
     {
@@ -92,7 +102,7 @@ protected override void OnUnPossess()
     private void OnBodyExploded()
     {
         Log.N("<color=red>时间到！肉体无法承受灵魂的能量，爆炸了！GAME OVER！</color>");
-        Destroy(gameObject);
+        Die(true);
     }
 
     // 【核心爽快机制】：大鱼吃小鱼的物理撞击真实加分
@@ -120,8 +130,17 @@ protected override void OnUnPossess()
 
     public void Die(bool isExplosion = false)
     {
+        isDying = true;
+
         if (isExplosion)
             Log.N("<color=red>肉体爆炸！</color>");
+
+        // 3. 通知裁判终止比赛 (仅当死的是玩家时)
+        if (isExplosion && Controller is IFactionMember member && member.FactionId == EFaction.Player)
+        {
+            // 只有明确查明这具死掉的身体里，装的是玩家的灵魂时，才宣告游戏失败
+            World.Instance.AuthorityGameMode.EndMatch();
+        }
 
         // 1. 如果当前有灵魂在驾驶，必须按规矩通知它解绑！
         if (Controller != null)
@@ -133,13 +152,6 @@ protected override void OnUnPossess()
         if (TimerSystem.HasInstance && _decayTimer != TimerHandle.Invalid)
         {
             TimerSystem.Instance.StopTimer(_decayTimer);
-        }
-
-        // 3. 通知裁判终止比赛 (仅当死的是玩家时)
-        if (isExplosion && Controller is IFactionMember member && member.FactionId == EFaction.Player)
-        {
-            // 只有明确查明这具死掉的身体里，装的是玩家的灵魂时，才宣告游戏失败
-            World.Instance.AuthorityGameMode.EndMatch();
         }
 
         // 4. 最后才能体面地销毁自己

@@ -1,8 +1,9 @@
+using GamePlayArchitecture;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 // 【新增】引入新版输入系统命名空间
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class InGameMenuController : MonoBehaviour
 {
@@ -27,7 +28,6 @@ public class InGameMenuController : MonoBehaviour
 
     private void Update()
     {
-        // 【核心修改】：使用新版 Input System 监听 ESC 键
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
             if (_isPaused)
@@ -46,7 +46,6 @@ public class InGameMenuController : MonoBehaviour
         _isPaused = true;
         if (PausePanel != null) PausePanel.SetActive(true);
         Time.timeScale = 0f;
-
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }

@@ -50,7 +50,7 @@ namespace GamePlayArchitecture
                 return;
             }
 
-                Log.D($"{name} 放弃了 {ControlledPawn.name} 的控制权");
+            Log.D($"{name} 放弃了 {ControlledPawn.name} 的控制权");
 
             // 1. 通知 APawn 它自由了
             ControlledPawn.UnPossessed();

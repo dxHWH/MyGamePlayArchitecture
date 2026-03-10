@@ -37,7 +37,7 @@ namespace GamePlayArchitecture
         private static bool _isApplicationQuitting = false;
 
         // 【新增】：提供一个安全的查询接口，用于在 OnDestroy 中判断单例是否存活
-        public static bool HasInstance => _instance != null;
+        public static bool HasInstance => (_instance != null && !_isApplicationQuitting);
 
         public static T Instance
         {

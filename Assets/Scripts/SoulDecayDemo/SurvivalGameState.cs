@@ -20,12 +20,22 @@ namespace GamePlayArchitecture
     }
 }
 
+
 // 【2. 统筹全服分数的专属计分板】
 public class SurvivalGameState : AGameState
 {
     public int PlayerScore { get; private set; }
     public int RedAIScore { get; private set; }
     public int BlueAIScore { get; private set; }
+
+    // 【新增】：游戏开局时，向全世界通报一次：所有人都是 0 分
+    public override void BeginPlay()
+    {
+        base.BeginPlay();
+        EventSystem.Instance.Trigger(new ScoreChangedEventArgs(EFaction.Player, PlayerScore));
+        EventSystem.Instance.Trigger(new ScoreChangedEventArgs(EFaction.RedAI, RedAIScore));
+        EventSystem.Instance.Trigger(new ScoreChangedEventArgs(EFaction.BlueAI, BlueAIScore));
+    }
 
     // 开放给外界（Controller 或 Pawn）调用的加分接口
     public void AddScore(EFaction faction, int amount)
@@ -35,17 +45,21 @@ public class SurvivalGameState : AGameState
             case EFaction.Player:
                 PlayerScore += amount;
                 Log.N($"<color=cyan>[GameState] 玩家得分！当前分数: {PlayerScore}</color>");
+                if (EventSystem.HasInstance)
+                    EventSystem.Instance.Trigger(new ScoreChangedEventArgs(EFaction.Player, PlayerScore));
                 break;
             case EFaction.RedAI:
                 RedAIScore += amount;
                 Log.N($"<color=red>[GameState] 红色帝国得分！当前分数: {RedAIScore}</color>");
+                if (EventSystem.HasInstance)
+                    EventSystem.Instance.Trigger(new ScoreChangedEventArgs(EFaction.RedAI, RedAIScore));
                 break;
             case EFaction.BlueAI:
                 BlueAIScore += amount;
                 Log.N($"<color=blue>[GameState] 蓝色联盟得分！当前分数: {BlueAIScore}</color>");
+                if (EventSystem.HasInstance)
+                    EventSystem.Instance.Trigger(new ScoreChangedEventArgs(EFaction.BlueAI, BlueAIScore));
                 break;
         }
-
-        // 未来如果你做了 UI，可以在这里通过 EventSystem.Instance.Trigger 发送分数更新广播
     }
 }

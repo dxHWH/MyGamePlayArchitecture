@@ -28,7 +28,7 @@ public class SurvivalGameMode : AGameMode
         playerSoul.FactionId = EFaction.Player;
         playerSoul.Possess(playerBody);
 
-        // 对齐你 TimerSystem 的签名，使用具名参数避免错位！
+        // 对齐 TimerSystem 的签名，使用具名参数避免错位
         TimerSystem.Instance.CreateTimer(
             duration: 3.0f,
             onComplete: _spawnAIAction,
@@ -79,7 +79,7 @@ public class SurvivalGameMode : AGameMode
         {
             pawn.transform.localScale = Vector3.one * 0.8f;
             pawn.MoveSpeed = 8f;
-            pawn.MaxLifespan = 30f;
+            pawn.MaxLifespan = 5f;
         }
 
         return pawn;

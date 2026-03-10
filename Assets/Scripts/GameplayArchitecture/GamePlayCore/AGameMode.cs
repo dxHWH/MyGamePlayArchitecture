@@ -21,7 +21,7 @@ namespace GamePlayArchitecture
             // 2. 动态生成物体
             GameObject gsObj = new GameObject($"GameState_{this.GetType().Name}");
 
-            // 3. 【神来之笔】：使用反射版的 AddComponent，动态挂载对应的子类计分板！
+            // 3. 使用反射版的 AddComponent，动态挂载对应的子类计分板！
             base.GameState = gsObj.AddComponent(stateType) as AGameState;
 
             // 4. 权威担保：裁判亲自去世界中心注册！
