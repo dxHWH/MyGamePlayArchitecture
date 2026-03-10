@@ -42,5 +42,9 @@ namespace GamePlayArchitecture
             Log.N("[GameModeBase] 游戏基础流程开始");
             // 简单单机游戏在这里直接生成 DefaultPawnClass 即可
         }
+
+        public virtual void EndMatch()
+        { 
+        }
     }
 }

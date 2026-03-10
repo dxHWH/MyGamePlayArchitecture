@@ -57,7 +57,7 @@ namespace GamePlayArchitecture
             }
         }
 
-        public virtual void EndMatch()
+        override public  void EndMatch()
         {
             Log.N("[GameMode] 比赛结束，准备结算！");
 

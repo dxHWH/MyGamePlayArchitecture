@@ -28,7 +28,7 @@ public class SurvivalGameMode : AGameMode
         playerSoul.FactionId = EFaction.Player;
         playerSoul.Possess(playerBody);
 
-        // 【修复致命幻觉】：严格对齐你 TimerSystem 的签名，使用具名参数避免错位！
+        // 对齐你 TimerSystem 的签名，使用具名参数避免错位！
         TimerSystem.Instance.CreateTimer(
             duration: 3.0f,
             onComplete: _spawnAIAction,

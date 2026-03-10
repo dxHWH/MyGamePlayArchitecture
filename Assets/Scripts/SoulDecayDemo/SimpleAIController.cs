@@ -32,4 +32,10 @@ public class SimpleAIController : AController, IFactionMember
             combatPawn.Move(new Vector3(x, 0, z).normalized, deltaTime);
         }
     }
+    protected override void OnUnPossess(APawn pawn)
+    {
+        base.OnUnPossess(pawn);
+        // AI 失去肉体后毫无意义，直接自我销毁，绝不驻留内存！
+        Destroy(gameObject);
+    }
 }

@@ -60,6 +60,7 @@ public class CombatPawn : APawn
 
         Collider col = GetComponent<Collider>();
         if (col != null) Destroy(col);
+        Destroy(gameObject, 3.0f);
     }
 
     private void OnBodyExploded()
@@ -79,7 +80,8 @@ public class CombatPawn : APawn
             {
                 Log.N("<color=yellow>碾碎了一个低级躯体！得分 +1</color>");
 
-                Destroy(otherPawn.gameObject);
+                //Destroy(otherPawn.gameObject);
+                otherPawn.Die(isExplosion: false);
 
                 // 接入计分板：向世界报告玩家得分！
                 if (World.HasInstance && World.Instance.GameState is SurvivalGameState gameState)
@@ -88,5 +90,33 @@ public class CombatPawn : APawn
                 }
             }
         }
+    }
+
+    public void Die(bool isExplosion = false)
+    {
+        if (isExplosion)
+            Log.N("<color=red>肉体爆炸！</color>");
+
+        // 1. 如果当前有灵魂在驾驶，必须按规矩通知它解绑！
+        if (Controller != null)
+        {
+            Controller.UnPossess();
+        }
+
+        // 2. 切断计时器
+        if (TimerSystem.HasInstance && _decayTimer != TimerHandle.Invalid)
+        {
+            TimerSystem.Instance.StopTimer(_decayTimer);
+        }
+
+        // 3. 通知裁判终止比赛 (仅当死的是玩家时)
+        if (isExplosion && Controller is IFactionMember member && member.FactionId == EFaction.Player)
+        {
+            // 只有明确查明这具死掉的身体里，装的是玩家的灵魂时，才宣告游戏失败
+            World.Instance.AuthorityGameMode.EndMatch();
+        }
+
+        // 4. 最后才能体面地销毁自己
+        Destroy(gameObject);
     }
 }
